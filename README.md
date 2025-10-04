@@ -396,7 +396,7 @@ where:
 ## Getting Started
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-repo/VSDBabySoC.git
+   git clone git clone https://github.com/manili/VSDBabySoC.git
    ```
 
 ---
