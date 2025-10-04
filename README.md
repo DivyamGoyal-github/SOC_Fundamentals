@@ -18,7 +18,7 @@ This repository provides a deep dive into the **fundamentals of System on Chip (
 - [Role of VLSI in SoC Design](#role-of-vlsi-in-soc-design)
 - [Latest Trends in SoC and VLSI (2025)](#latest-trends-in-soc-and-vlsi-2025)
 - [Applications of SoC](#applications-of-soc)
-- [Resources and Further Reading](#resources-and-further-reading)
+- [VSDBabySoC](#vsdbabysoc-a-compact-risc-v-soc-for-learning-and-experimentation)
 
 ---
 
@@ -175,6 +175,229 @@ SoC Design Flow Stages:
 | Consumer Electronics | Smart TVs, gaming consoles, digital cameras                     |
 | Telecommunications | 5G modems, network routers                                      
 
+---
+# VSDBabySoC: A Compact RISC-V SoC for Learning and Experimentation
+
+**VSDBabySoC** is a small-scale, open-source **System on Chip (SoC)** built around the **RISC-V** architecture. Designed for educational and experimental purposes, it enables simultaneous testing of three open-source IP cores and calibration of analog components.
+
+---
+
+## Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [SoC Architecture](#soc-architecture)
+- [Components](#components)
+  - [RVMYTH: The RISC-V CPU](#rvmyth-the-risc-v-cpu)
+  - [PLL: Phase-Locked Loop](#pll-phase-locked-loop)
+  - [DAC: Digital-to-Analog Converter](#dac-digital-to-analog-converter)
+- [How It Works](#how-it-works)
+  - [Initialization and Clock Generation](#initialization-and-clock-generation)
+  - [Data Processing in RVMYTH](#data-processing-in-rvmyth)
+  - [Analog Signal Generation via DAC](#analog-signal-generation-via-dac)
+- [Why Use a PLL?](#why-use-a-pll)
+- [DAC: Digital to Analog Conversion](#dac-digital-to-analog-conversion)
+- [Applications](#applications)
+- [Getting Started](#getting-started)
+
+---
+
+# VSDBabySoC
+VSDBabySoC is designed to bridge the gap between digital and analog domains, making it an ideal platform for learning about SoC design, CPU architecture, clock synchronization, and analog signal generation. It integrates a RISC-V CPU, a PLL for clock generation, and a DAC for analog output, all on a single chip.
+
+---
+
+## Key Features
+
+| Feature                | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| **RISC-V CPU (RVMYTH)**| Open-source, customizable CPU core for processing tasks.                   |
+| **8x PLL**             | Generates stable, synchronized clock signals for the SoC.                  |
+| **10-bit DAC**         | Converts digital data to analog signals for real-world applications.       |
+| **Open-Source**        | All components and designs are open for modification and experimentation.  |
+| **Educational Focus**  | Ideal for learning SoC design, CPU architecture, and analog/digital conversion. |
+
+---
+
+## SoC Architecture
+The VSDBabySoC architecture is modular, with each component playing a specific role:
+
+<div>
+  <img src="./assets/VSDbabySOC.png" alt="VSDbabySOC" width="80%">
+</div>
+
+## Components
+
+### RVMYTH: The RISC-V CPU
+- **Role:** Acts as the brain of the SoC, executing instructions and managing data flow.
+- **Features:**
+  - Open-source RISC-V ISA implementation.
+  - Customizable and extensible for educational purposes.
+  - Communicates with the DAC via the `r17` register.
+- **Use Case:** Ideal for learning CPU architecture, assembly programming, and SoC integration.
+
+### PLL: Phase-Locked Loop
+- **Role:** Generates a stable, synchronized clock signal for the SoC.
+- **Features:**
+  - Locks onto a reference frequency and minimizes jitter.
+  - Ensures all components operate in harmony.
+  - Can multiply or divide frequencies as needed.
+- **Block Diagram:**
+
+<div align="center" >
+  <img src="./assets/PLL_Diagram.png" alt="PLL_Diagram" width="70%">
+</div>
+
+- **Components:**
+  - **Phase Detector:** Compares input and output signals, generating an error signal.
+  - **Loop Filter:** Processes the error signal to produce a control voltage.
+  - **VCO (Voltage-Controlled Oscillator):** Adjusts frequency based on the control voltage.
+
+### DAC: Digital-to-Analog Converter
+- **Role:** Converts digital data from the CPU into analog signals.
+- **Features:**
+  - 10-bit resolution for high-quality output.
+  - Outputs analog signals to external devices (e.g., speakers, displays).
+  - Supports real-world applications like audio/video generation.
+- **Types of DACs:**
+  - **Weighted Resistor DAC:** Uses resistors of different values for each bit.
+  - **R-2R Ladder DAC:** Uses a network of resistors for simpler design and scaling.
+
+### **1. Binary Weighted Resistor DAC**
+
+#### **Overview**
+The **Binary Weighted Resistor DAC** converts a digital input (binary code) into an analog voltage output using resistors whose values are weighted in powers of two. Each bit of the digital input controls a switch that connects the corresponding resistor to a reference voltage or ground.
+
+#### **Circuit Diagram**
+
+<div align="center" >
+  <img src="./assets/BinaryWeightedDAC.png" alt="BinaryWeightedDAC" width="70%">
+</div>
+
+#### **Working Principle**
+- Each bit of the digital input is connected to a resistor whose value is twice that of the next lower bit.
+- The most significant bit (MSB) uses the smallest resistor, and the least significant bit (LSB) uses the largest.
+- The output voltage is the sum of the voltages contributed by each bit, weighted by the resistor values.
+
+#### **Advantages**
+- Simple and easy to understand.
+- Fast conversion due to direct resistor network.
+
+#### **Disadvantages**
+- Requires a wide range of resistor values, which can be impractical for high-resolution DACs.
+- More expensive and less scalable for higher bit counts.
+
+---
+
+### **2. R-2R Ladder DAC**
+
+#### **Overview**
+The **R-2R Ladder DAC** is a popular type of DAC that uses only two resistor values (R and 2R) arranged in a ladder network. This design simplifies the circuit and makes it easier to scale for higher resolutions.
+
+#### **Circuit Diagram**
+
+<div align="center" >
+  <img src="./assets/R2RLadderDAC.png" alt="R2RLadderDAC" width="70%">
+</div>
+
+#### **Working Principle**
+- The ladder network is constructed using resistors of values R and 2R.
+- Each bit of the digital input controls a switch that connects the corresponding node to either the reference voltage or ground.
+- The equivalent resistance seen by each node is always 2R, regardless of the number of bits, due to the ladder’s recursive structure.
+- The output voltage is the sum of the voltages contributed by each bit, weighted by the ladder network.
+
+#### **Advantages**
+- Uses only two resistor values, making it easier and cheaper to manufacture.
+- Highly scalable for higher bit counts.
+- More practical for integrated circuit implementation.
+
+#### **Disadvantages**
+- Slightly more complex to analyze and design compared to the binary weighted DAC.
+- Requires precise resistor matching for accurate conversion.
+
+#### **Formula**
+The output voltage `V_out` is given by:
+
+`V_out = -V_ref * (b0/2^1 + b1/2^2 + b2/2^3 + ... + b(n-1)/2^n)`
+
+where:
+- `V_ref` is the reference voltage,
+- `b0, b1, ..., b(n-1)` are the bits of the digital input (0 or 1),
+- `n` is the number of bits.
+
+---
+
+### **Comparison Table**
+
+| Feature                     | Binary Weighted Resistor DAC       | R-2R Ladder DAC                     |
+|-----------------------------|------------------------------------|-------------------------------------|
+| **Resistor Values**         | Many different values (2^0R, 2^1R, ...) | Only two values (R and 2R)         |
+| **Scalability**             | Poor for high bit counts           | Excellent for high bit counts       |
+| **Cost**                    | Higher (more resistor types)       | Lower (only two resistor types)     |
+| **Complexity**              | Simple                             | Moderate                            |
+| **Speed**                   | Fast                               | Fast                                |
+| **Practicality for ICs**    | Less practical                     | Highly practical                    |
+
+---
+
+### **Why R-2R Ladder DAC is Used in VSDBabySoC**
+- **Simplicity:** Only two resistor values are needed, simplifying the design and reducing cost.
+- **Scalability:** Easily extended to higher resolutions (e.g., 10-bit DAC in VSDBabySoC).
+- **Integration:** Well-suited for implementation in integrated circuits and FPGAs.
+
+---
+## How VSD Baby SOC Works
+
+### Initialization and Clock Generation
+1. On power-up, the PLL is activated.
+2. The PLL locks onto the reference clock and generates a stable, synchronized clock signal.
+3. This clock signal is distributed to the RVMYTH CPU and DAC, ensuring all components operate in sync.
+
+### Data Processing in RVMYTH
+1. The RVMYTH CPU executes instructions and processes data.
+2. The `r17` register is used to hold and cycle through values destined for the DAC.
+3. As the CPU runs, it updates `r17` with new data, preparing it for analog conversion.
+
+### Analog Signal Generation via DAC
+1. The DAC receives digital values from the RVMYTH CPU.
+2. It converts these values into an analog signal.
+3. The analog output is saved to a file (`OUT`) and can be sent to external devices (e.g., TVs, mobile phones) for further processing or display.
+
+---
+
+## Why Use a PLL?
+
+| Issue                     | Impact                                                                 |
+|---------------------------|------------------------------------------------------------------------|
+| **Clock Distribution Delays** | Long wiring can introduce delays, affecting timing.                   |
+| **Clock Jitter**          | Variations in signal timing can disrupt synchronization.               |
+| **Different Frequency Needs** | Different SoC blocks may require different clock frequencies.       |
+| **Crystal Frequency Errors** | Crystals can drift with temperature and age, affecting accuracy.      |
+| **Frequency Stability**   | Higher ppm errors mean more frequency variation with temperature.     |
+
+**Solution:** The PLL provides a stable, adjustable clock signal, ensuring reliable operation across the SoC.
+
+---
+
+## DAC: Digital to Analog Conversion
+- **Digital Signal Representation:** Input is a binary code (1s and 0s).
+- **Structure:** Multiple binary inputs, single analog output.
+- **In VSDBabySoC:** 10-bit DAC allows for 1024 possible output values, enabling smooth analog signals.
+
+---
+
+## Applications
+- **Education:** Learn SoC design, CPU architecture, and analog/digital conversion.
+- **Prototyping:** Test and calibrate open-source IP cores.
+- **Multimedia:** Generate analog signals for audio/video applications.
+- **Embedded Systems:** Interface with analog sensors and actuators.
+
+---
+
+## Getting Started
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-repo/VSDBabySoC.git
+   ```
 
 ---
 ## Acknowledgement 👑
