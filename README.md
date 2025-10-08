@@ -406,6 +406,9 @@ sudo apt install python3-venv
 python3 -m venv venv
 source venv/bin/activate
 pip install pyyaml click sandpiper-saas
+
+# Convert rvmyth.tlv to Verilog
+sandpiper-saas -i ./src/module/*.tlv -o rvmyth.v --bestsv --noline -p verilog --outdir ./src/module/
 ```
 ### Explanation:
 - make: Build automation tool
